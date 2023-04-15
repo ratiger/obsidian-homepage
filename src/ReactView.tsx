@@ -4,78 +4,69 @@ import { useApp } from "./hooks";
 import * as ReactDOM from "react-dom";
 
 export const ReactView = () => {
-    const app = useApp();
+    const { vault } = useApp();
     const [files, setFiles] = React.useState<TFile[]>([]);
     const [contents, setContents] = React.useState<HTMLElement[]>([]);
 
     React.useEffect(() => {
         const getFiles = async () => {
-            const files = await app.vault.getMarkdownFiles();
+            const files = await vault.getMarkdownFiles();
             setFiles(files);
         };
         getFiles();
     }, []);
 
-    React.useEffect(() => {
-        const getContents = async () => {
-            const promises = files.map(async (file) => {
-                const contentEl = document.createElement('div');
-                const mdStr = await app.vault.cachedRead(file);
-                const mdStrTemp = mdStr; // firstLines(mdStr, 3); 只取前3行
-                await MarkdownRenderer.renderMarkdown(
-                    mdStrTemp,
-                    contentEl,
-                    file.path,
-                    null,
-                );
-                return contentEl;
-            })
-            const contents = await Promise.all(promises);
-            setContents(contents);
-        };
-
-        if (files.length > 0) {
-            getContents();
-        }
-    }, [files]);
-
-    // 这个key目前这样用的话，文件内容更新时文档不会更新
-
-    return (<>
+    return (
         <ul className="notelist">
-            {contents.map((content, index) => (
-                <li key={files[index].path}>
-                    <NoteView time={formatTimestamp(files[index].stat.ctime)}
-                        title={files[index].path.slice(0, -3)}
-                        domEl={content} ></NoteView>
+            {files.map((file) => (
+                <li key={file.path + file.stat.mtime}>
+                    <NoteView file={file} />
                 </li>
-
             ))}
-        </ul >
-    </>);
+        </ul>
+    );
 };
 
 interface NoteProp {
-    time: string,
-    title: string,
-    domEl: HTMLElement
+    file: TFile
 }
 
-const NoteView: React.FC<NoteProp> = ({ time, title, domEl }) => {
+const NoteView: React.FC<NoteProp> = ({ file }) => {
+    const { vault } = useApp();
     const ref = React.useRef<HTMLDivElement>(null);
+    const [contentEl, setContentEl] = React.useState<HTMLElement>();
+
+    // TODO: 抽取成Hook
+    React.useEffect(() => {
+        const getContent = async () => {
+            const contentEl = document.createElement('div');
+            const mdStr = await vault.cachedRead(file);
+            const mdStrTemp = mdStr; // firstLines(mdStr, 3); 只取前3行
+            await MarkdownRenderer.renderMarkdown(
+                mdStrTemp,
+                contentEl,
+                file.path,
+                null,
+            );
+            setContentEl(contentEl);
+        };
+        getContent();
+    }, []);
 
     React.useEffect(() => {
         if (ref.current) {
             const node = ReactDOM.findDOMNode(ref.current);
             node?.empty();
-            node?.appendChild(domEl);
+            if (contentEl) {
+                node?.appendChild(contentEl);
+            }
         }
-    }, [domEl])
+    }, [contentEl]);
 
     return (
         <div className="note">
-            <div className="note-title">{title}</div>
-            <div className="note-time">{time}</div>
+            <div className="note-title">{file.path.slice(0, -3)}</div>
+            <div className="note-time">{formatTimestamp(file.stat.ctime)}</div>
             <div className="note-content" ref={ref}></div>
         </div>
     );
