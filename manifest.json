@@ -1,11 +1,11 @@
 {
-	"id": "obsidian-sample-plugin",
-	"name": "Sample Plugin",
-	"version": "1.0.0",
+	"id": "obsidian-homepage",
+	"name": "Home page",
+	"version": "0.0.1",
 	"minAppVersion": "0.15.0",
-	"description": "This is a sample plugin for Obsidian. This plugin demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
+	"description": "displays all notes in a timeline like flomo and provides graet filter and search features to find the note you wrote.",
+	"author": "ratiger",
+	"authorUrl": "https://github.com/ratiger",
 	"fundingUrl": "https://obsidian.md/pricing",
 	"isDesktopOnly": false
 }
