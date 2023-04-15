@@ -1,8 +1,63 @@
-/*
+li {
+    list-style: none;
+}
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
+/* note list */
+.notelist {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    /* align-items: flex-start; */
+    flex-grow: 1;
+    width: 100%;
+    overflow-y: scroll;
+    gap: 12px;
+    /* scrollbar-width: none; */
+}
 
-If your plugin does not need CSS, delete this file.
+/* note */
+.note {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    /* align-items: stretch; */
+    width: 100%;
+    padding: 12px 18px;
+    border-radius: 8px;
+}
 
-*/
+.theme-light .note {
+    background-color: #ffffff;
+}
+
+.theme-dark .note {
+    /* background-color: #303030; */
+    background-color: rgb(46, 46, 46);
+}
+
+/* 鼠标在某一条笔记时的效果 用border影响尺寸了，要么变为content-size；也可以像flomo用阴影 */
+/* .theme-dark .note:hover {
+    box-shadow: #ffffff;
+    border-color: #353535;
+    border-width: 1px;
+    border-style: solid;
+    border: 1px solid #4a4a4a;
+} */
+
+.note-title {
+    font-weight: var(--inline-title-weight);
+    font-size: calc(var(--inline-title-size) * 0.7);
+    line-height: var(--inline-title-line-height);
+    font-style: var(--inline-title-style);
+    font-variant: var(--inline-title-variant);
+    font-family: var(--inline-title-font);
+    /* padding-bottom: 0.5em; */
+    letter-spacing: -0.015em;
+    color: var(--inline-title-color);
+}
+
+.note-time {
+    font-size: 0.9em;
+    color: #9d9d9d;
+    margin: 4px 0 6px 0;
+}
