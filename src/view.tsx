@@ -1,6 +1,6 @@
 import { ItemView, WorkspaceLeaf } from "obsidian";
 import * as React from "react";
-import { ReactView } from "./ReactView";
+import { NoteListView } from "./NoteListView";
 import { createRoot } from "react-dom/client";
 import { AppContext } from "./context";
 export const VIEW_TYPE_HOMEPAGE = "homepage-view";
@@ -22,7 +22,7 @@ export class HomePageView extends ItemView {
         const root = createRoot(this.containerEl.children[1]);
         root.render(
             <AppContext.Provider value={this.app}>
-                <ReactView />
+                <NoteListView />
             </AppContext.Provider>
         );
     }

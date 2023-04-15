@@ -3,7 +3,7 @@ import { App, ItemView, TFile, Vault, MarkdownRenderer, WorkspaceLeaf } from "ob
 import { useApp } from "./hooks";
 import * as ReactDOM from "react-dom";
 
-export const ReactView = () => {
+export const NoteListView = () => {
     const { vault } = useApp();
     const [files, setFiles] = React.useState<TFile[]>([]);
     const [contents, setContents] = React.useState<HTMLElement[]>([]);
