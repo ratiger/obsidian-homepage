@@ -1,7 +1,3 @@
-li {
-    list-style: none;
-}
-
 /* note list */
 .notelist {
     display: flex;
@@ -12,6 +8,8 @@ li {
     width: 100%;
     overflow-y: scroll;
     gap: 12px;
+    padding-left: 12px;
+    list-style: none;
     /* scrollbar-width: none; */
 }
 
