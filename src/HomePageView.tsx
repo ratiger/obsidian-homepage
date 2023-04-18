@@ -1,13 +1,18 @@
-import { ItemView, WorkspaceLeaf } from "obsidian";
+import { ItemView, Plugin, WorkspaceLeaf } from "obsidian";
 import * as React from "react";
 import { NoteListView } from "./NoteListView";
 import { createRoot } from "react-dom/client";
-import { AppContext } from "./context";
+import { PluginContext } from "./context";
+import MyPlugin from "main";
+
 export const VIEW_TYPE_HOMEPAGE = "homepage-view";
 
 export class HomePageView extends ItemView {
-    constructor(leaf: WorkspaceLeaf) {
+    plugin: MyPlugin;
+
+    constructor(leaf: WorkspaceLeaf, plugin: MyPlugin) {
         super(leaf);
+        this.plugin = plugin;
     }
 
     getViewType() {
@@ -21,9 +26,9 @@ export class HomePageView extends ItemView {
     async onOpen() {
         const root = createRoot(this.containerEl.children[1]);
         root.render(
-            <AppContext.Provider value={this.app}>
+            <PluginContext.Provider value={this.plugin}>
                 <NoteListView />
-            </AppContext.Provider>
+            </PluginContext.Provider>
         );
     }
 

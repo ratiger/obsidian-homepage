@@ -1,6 +1,6 @@
 import * as React from "react";
 import { TFile, MarkdownRenderer } from "obsidian";
-import { useApp } from "./hooks";
+import { usePlugin } from "./context";
 import * as ReactDOM from "react-dom";
 
 interface NoteProp {
@@ -8,7 +8,7 @@ interface NoteProp {
 }
 
 const useContentEl = (file: TFile) => {
-    const { vault } = useApp();
+    const { vault } = usePlugin().app;
     const [contentEl, setContentEl] = React.useState<HTMLElement>();
     React.useEffect(() => {
         const getContent = async () => {

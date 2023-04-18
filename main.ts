@@ -1,14 +1,12 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
-import { HomePageView, VIEW_TYPE_HOMEPAGE } from "./src/view";
-
-// Remember to rename these classes and interfaces!
+import { App, Notice, Plugin, PluginSettingTab, Setting, Vault } from 'obsidian';
+import { HomePageView, VIEW_TYPE_HOMEPAGE } from "./src/HomePageView";
 
 interface MyPluginSettings {
-	mySetting: string;
+	rootPath: string;
 }
 
 const DEFAULT_SETTINGS: MyPluginSettings = {
-	mySetting: 'default'
+	rootPath: '/'
 }
 
 export default class MyPlugin extends Plugin {
@@ -18,27 +16,25 @@ export default class MyPlugin extends Plugin {
 		console.log("on load");
 		await this.loadSettings();
 
+		// 视图
 		this.registerView(
 			VIEW_TYPE_HOMEPAGE,
-			(leaf) => new HomePageView(leaf)
+			(leaf) => new HomePageView(leaf, this)
 		);
 
-		// This creates an icon in the left ribbon.
+		// 左侧工具栏的图标
 		const ribbonIconEl = this.addRibbonIcon('home', 'Home Page', (evt: MouseEvent) => {
-			// Called when the user clicks the icon.
-			new Notice('Hello, you!!');
-			// this.app.workspace.iterateAllLeaves((leaf) => {
-			// 	console.log("iterateAllLeaves", leaf.getViewState().type);
-			// });
+			new Notice('Hello, you!!!');
 			this.activateView();
 		});
-		// Perform additional things with the ribbon
 		ribbonIconEl.addClass('my-plugin-ribbon-class');
 
+		// 状态栏
 		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
 		// const statusBarItemEl = this.addStatusBarItem();
 		// statusBarItemEl.setText('Status Bar Text statusBarItemEl');
 
+		// 命令（及快捷键）
 		// This adds a simple command that can be triggered anywhere
 		// this.addCommand({
 		// 	id: 'open-sample-modal-simple',
@@ -76,15 +72,18 @@ export default class MyPlugin extends Plugin {
 		// 	}
 		// });
 
+		// 设置项
 		// This adds a settings tab so the user can configure various aspects of the plugin
-		// this.addSettingTab(new SampleSettingTab(this.app, this));
+		this.addSettingTab(new RootSettingTab(this.app, this));
 
+		// 监听事件
 		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
 		// Using this function will automatically remove the event listener when this plugin is disabled.
 		// this.registerDomEvent(document, 'click', (evt: MouseEvent) => {
 		// 	console.log('click', evt);
 		// });
 
+		// 定时器
 		// When registering intervals, this function will automatically clear the interval when the plugin is disabled.
 		// this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
 	}
@@ -105,7 +104,6 @@ export default class MyPlugin extends Plugin {
 	async activateView() {
 		this.app.workspace.detachLeavesOfType(VIEW_TYPE_HOMEPAGE); // 清除当前view，使得只保留一个
 
-		// await this.app.workspace.getRightLeaf(false)
 		await this.app.workspace.getLeaf(true).setViewState({
 			type: VIEW_TYPE_HOMEPAGE,
 			active: true,
@@ -115,25 +113,21 @@ export default class MyPlugin extends Plugin {
 			this.app.workspace.getLeavesOfType(VIEW_TYPE_HOMEPAGE)[0]
 		);
 	}
-}
 
-class SampleModal extends Modal {
-	constructor(app: App) {
-		super(app);
-	}
-
-	onOpen() {
-		const { contentEl } = this;
-		contentEl.setText('Woah!');
-	}
-
-	onClose() {
-		const { contentEl } = this;
-		contentEl.empty();
+	changeRoot(rootPath: string) {
+		this.settings.rootPath = rootPath;
+		this.saveSettings();
+		if (this.app.workspace.getActiveViewOfType(HomePageView)) {
+			const e = new CustomEvent("changeRootPath", {
+				detail: rootPath
+			});
+			console.log('emit shit', rootPath);
+			window.dispatchEvent(e);
+		}
 	}
 }
 
-class SampleSettingTab extends PluginSettingTab {
+class RootSettingTab extends PluginSettingTab {
 	plugin: MyPlugin;
 
 	constructor(app: App, plugin: MyPlugin) {
@@ -146,18 +140,27 @@ class SampleSettingTab extends PluginSettingTab {
 
 		containerEl.empty();
 
-		containerEl.createEl('h2', { text: 'Settings for my awesome plugin.' });
+		containerEl.createEl('h1', { text: '基础选项' });
 
 		new Setting(containerEl)
-			.setName('Setting #1')
-			.setDesc('It\'s a secret')
-			.addText(text => text
-				.setPlaceholder('Enter your secret')
-				.setValue(this.plugin.settings.mySetting)
-				.onChange(async (value) => {
-					console.log('Secret: ' + value);
-					this.plugin.settings.mySetting = value;
-					await this.plugin.saveSettings();
-				}));
+			.setName('展示该目录下的所有笔记')
+			.setDesc('默认是根目录')
+			.addDropdown((cb) => {
+				const getAllFolders = (vault: Vault) => {
+					const files = vault.getFiles();
+					const folders = files.map((file) => {
+						return file.parent.path;
+					});
+					return [...new Set(folders)];
+				}
+				const folders = getAllFolders(this.app.vault);
+				folders.forEach((path) => {
+					cb.addOption(path, path);
+				});
+				cb.setValue(this.plugin.settings.rootPath)
+					.onChange((newFolder) => {
+						this.plugin.changeRoot(newFolder);
+					});
+			});
 	}
 }
