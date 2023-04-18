@@ -3,7 +3,7 @@ import * as React from "react";
 import { NoteListView } from "./NoteListView";
 import { createRoot } from "react-dom/client";
 import { PluginContext } from "./context";
-import MyPlugin from "main";
+import MyPlugin from "./MyPlugin";
 
 export const VIEW_TYPE_HOMEPAGE = "homepage-view";
 
